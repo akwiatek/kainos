@@ -99,14 +99,18 @@ process_repositories() {
         cd $d
         if [ -d .git ]; then
             git_log --patch >> "$OUTPUT_TMP"
-            git_log --oneline | awk --assign PROJECT="$d" '
+            git_log --oneline | awk --assign REPOSITORY="$d" '
             BEGIN {
                 COL_DEFAULT = "\033[0m"
                 COL_GREEN   = "\033[32m"
                 COL_YELLOW  = "\033[33m"
+                AFTER_COMMIT_HASH_SPACE_LENGTH = 1
             }
             {
-                print COL_GREEN PROJECT, COL_YELLOW $1, COL_DEFAULT $0
+                commitHash = $1
+                commitHashLength = length(commitHash)
+                afterCommitHash = substr($0, commitHashLength + AFTER_COMMIT_HASH_SPACE_LENGTH + 1)
+                print COL_GREEN REPOSITORY, COL_YELLOW commitHash, COL_DEFAULT afterCommitHash
             }
             '
         fi
