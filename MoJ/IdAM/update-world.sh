@@ -24,9 +24,9 @@ for_each_project() {
             continue
         fi
         echo "---- $d ----"
-        cd $d
+        pushd $d
         $1
-        cd -
+        popd
         echo "$PHASE_NO $d" >> $STATUS_FILE
     done
 }
@@ -70,10 +70,13 @@ download_dependencies() {
         bower update
     fi
     find . -name 'requirements*.yml' | while read req; do
-        ansible-galaxy install --role-file "$req" --force --roles-path roles || \
-        ansible-galaxy install --role-file "$req" --force --roles-path roles || \
-        ansible-galaxy install --role-file "$req" --force --roles-path roles || \
-        ansible-galaxy install --role-file "$req" --force --roles-path roles
+        pushd "$(dirname $req)"
+        local breq="$(basename $req)"
+        ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
+        ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
+        ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
+        ansible-galaxy install --role-file "$breq" --force --roles-path roles
+        popd
     done
 }
 
@@ -88,11 +91,11 @@ get_docker_image_name() {
     echo "$name"
 }
 
-build_base_docker() {
-    for bf in dev-tools/docker/ dev-tools/docker/monit/; do
-        cd
+build_dev_docker() {
+    for bf in dev-tools/docker/base/ dev-tools/docker/monit/ dev-tools/docker/logstash/; do
+        pushd $bf
         make
-        cd -
+        popd
     done
 }
 
@@ -112,13 +115,13 @@ tag_docker() {
 }
 
 # go to the script's folder
-cd $0:h
+pushd $0:h
 
 set_up_status_file
 for_each_project download_changes
 for_each_project apply_changes
 for_each_project download_dependencies
-build_base_docker
+build_dev_docker
 for_each_project build_docker
 for_each_project tag_docker
 tear_down_status_file
