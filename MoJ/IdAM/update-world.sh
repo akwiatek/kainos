@@ -111,6 +111,7 @@ tag_docker() {
         local image=$(get_docker_image_name)
         docker tag ${image}:${DOCKER_TAG_TMP} ${image}:${DOCKER_TAG_NOW}
         docker tag ${image}:${DOCKER_TAG_TMP} ${image}:latest
+        docker rmi ${image}:${DOCKER_TAG_TMP}
     fi
 }
 
