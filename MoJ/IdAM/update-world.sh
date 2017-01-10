@@ -85,9 +85,6 @@ get_docker_image_name() {
     if [ "$name" = 'idam-eventsconsumer-service' ]; then
         name='idam-events-service'
     fi
-    if [ "$name" = 'c2istub-openig' ]; then
-        name='c2istub-service'
-    fi
     echo "$name"
 }
 
