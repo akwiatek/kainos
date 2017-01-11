@@ -22,7 +22,7 @@ do
         fi
 
         # Check for IdAM too long lines
-        git show --no-color --find-copies --find-renames --unified=0 "$local_ref" \
+        git show --no-color --find-copies --find-renames --unified=0 "$range" \
             | sed --silent --regexp-extended '
                 # for each file
                 /^diff --git /,/^[+-]/! {
