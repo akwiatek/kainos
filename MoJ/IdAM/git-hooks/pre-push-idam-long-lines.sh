@@ -28,8 +28,6 @@ do
                 /^diff --git /,/^[+-]/! {
                     # check only given file types
                     /[.](groovy|java|js)(.j2)?$/I,/^[+-]/! {
-                        # skip metadata
-                        /^[+]{3} /!n
                         /^[+].{100}./p
                     }
                 }' \
