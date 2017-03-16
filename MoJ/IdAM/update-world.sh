@@ -114,6 +114,14 @@ tag_docker() {
     fi
 }
 
+clean_up_docker() {
+    docker ps     --filter=status=exited  --quiet | xargs --no-run-if-empty docker rm
+    docker ps     --filter=status=created --quiet | xargs --no-run-if-empty docker rm
+    docker images --filter=dangling=true  --quiet | xargs --no-run-if-empty docker rmi
+
+    docker images | awk '$2 ~ /^[0-9]{14}$/ { print $2 }' | sort --reverse | uniq | tail --lines=+3
+}
+
 # go to the script's folder
 pushd $0:h
 
@@ -121,6 +129,7 @@ set_up_status_file
 for_each_project download_changes
 for_each_project apply_changes
 for_each_project download_dependencies
+clean_up_docker
 build_dev_docker
 for_each_project build_docker
 for_each_project tag_docker
