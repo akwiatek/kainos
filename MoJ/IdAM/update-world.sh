@@ -91,7 +91,7 @@ get_docker_image_name() {
 }
 
 build_dev_docker() {
-    for bf in dev-tools/docker/base/ dev-tools/docker/monit/ dev-tools/docker/logstash/; do
+    for bf in dev-tools/docker/base/ dev-tools/docker/monit/; do
         pushd $bf
         make
         popd
