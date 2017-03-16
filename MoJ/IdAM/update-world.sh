@@ -75,6 +75,8 @@ download_dependencies() {
         ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
         ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
         ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
+        ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
+        ansible-galaxy install --role-file "$breq" --force --roles-path roles || \
         ansible-galaxy install --role-file "$breq" --force --roles-path roles
         popd
     done
