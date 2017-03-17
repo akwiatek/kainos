@@ -5,7 +5,8 @@ set -e
 
 STATUS_FILE='.update-world.status'
 PHASE_NO=0
-DOCKER_TAG_TMP=updateworld
+DOCKER_TAG_AFTER_BUILD=updateworld
+DOCKER_TAG_BEFORE_BUILD=preupdateworld
 DOCKER_TAG_NOW=$(date +%Y%m%d%H%M%S)
 
 set_up_status_file() {
@@ -100,16 +101,18 @@ build_dev_docker() {
 build_docker() {
     if [ -f Dockerfile ]; then
         local image=$(get_docker_image_name)
-        docker build . --tag ${image}:${DOCKER_TAG_TMP}
+        docker tag ${image}:latest ${image}:${DOCKER_TAG_BEFORE_BUILD} || docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
+        cat Dockerfile | sed 's/^FROM\s.*/FROM '"${image}"':'"${DOCKER_TAG_BEFORE_BUILD}"'\nUSER root/' | docker build --tag ${image}:${DOCKER_TAG_AFTER_BUILD} -
+        docker rmi ${image}:${DOCKER_TAG_BEFORE_BUILD}
     fi
 }
 
 tag_docker() {
     if [ -f Dockerfile ]; then
         local image=$(get_docker_image_name)
-        docker tag ${image}:${DOCKER_TAG_TMP} ${image}:${DOCKER_TAG_NOW}
-        docker tag ${image}:${DOCKER_TAG_TMP} ${image}:latest
-        docker rmi ${image}:${DOCKER_TAG_TMP}
+        docker tag ${image}:${DOCKER_TAG_AFTER_BUILD} ${image}:${DOCKER_TAG_NOW}
+        docker tag ${image}:${DOCKER_TAG_AFTER_BUILD} ${image}:latest
+        docker rmi ${image}:${DOCKER_TAG_AFTER_BUILD}
     fi
 }
 
