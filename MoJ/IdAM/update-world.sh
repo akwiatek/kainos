@@ -62,9 +62,8 @@ download_dependencies() {
             test-compile
     fi
     if [ -f package.json ]; then
-         npm install --ignore-scripts chromedriver
-         HTTPS_PROXY='' HTTP_PROXY='' node ./node_modules/chromedriver/install.js
-         npm update
+        npm update
+        npm prune
     fi
     if [ -f bower.json ]; then
         bower update
