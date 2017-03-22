@@ -102,7 +102,9 @@ build_docker() {
     if [ -f Dockerfile ]; then
         local image=$(get_docker_image_name)
         docker tag ${image}:latest ${image}:${DOCKER_TAG_BEFORE_BUILD} || docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
-        cat Dockerfile | sed 's/^FROM\s.*/FROM '"${image}"':'"${DOCKER_TAG_BEFORE_BUILD}"'\nUSER root/' | docker build --tag ${image}:${DOCKER_TAG_AFTER_BUILD} -
+        cat Dockerfile | sed 's/^FROM\s.*/FROM '"${image}"':'"${DOCKER_TAG_BEFORE_BUILD}"'\nUSER root/' > Dockerfile.latest
+        docker build --tag ${image}:${DOCKER_TAG_AFTER_BUILD} --file Dockerfile.latest .
+        rm Dockerfile.latest
         docker rmi ${image}:${DOCKER_TAG_BEFORE_BUILD}
     fi
 }
@@ -114,6 +116,12 @@ tag_docker() {
         docker tag ${image}:${DOCKER_TAG_AFTER_BUILD} ${image}:latest
         docker rmi ${image}:${DOCKER_TAG_AFTER_BUILD}
     fi
+}
+
+tag_demo_data() {
+    pushd idam-demo-data
+    git tag update-world-${DOCKER_TAG_NOW}
+    popd
 }
 
 clean_up_docker() {
@@ -135,4 +143,5 @@ clean_up_docker
 build_dev_docker
 for_each_project build_docker
 for_each_project tag_docker
+tag_demo_data
 tear_down_status_file
