@@ -8,6 +8,9 @@ PHASE_NO=0
 DOCKER_TAG_AFTER_BUILD=updateworld
 DOCKER_TAG_BEFORE_BUILD=preupdateworld
 DOCKER_TAG_NOW=$(date +%Y%m%d%H%M%S)
+# Actual Dockerfile used to build images
+# .md extension has been added in order to be ignored with .dockerignore
+DOCKERFILE=Dockerfile.tmp.md
 
 set_up_status_file() {
     [ -e $STATUS_FILE ] || touch $STATUS_FILE
@@ -102,9 +105,14 @@ build_docker() {
     if [ -f Dockerfile ]; then
         local image=$(get_docker_image_name)
         docker tag ${image}:latest ${image}:${DOCKER_TAG_BEFORE_BUILD} || docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
-        cat Dockerfile | sed 's/^FROM\s.*/FROM '"${image}"':'"${DOCKER_TAG_BEFORE_BUILD}"'\nUSER root/' > Dockerfile.latest
-        docker build --tag ${image}:${DOCKER_TAG_AFTER_BUILD} --file Dockerfile.latest .
-        rm Dockerfile.latest
+        if [ "$image" eq 'dmzstub-proxy']; then
+            docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
+        fi
+        # TODO pending CR
+        if [ "$image" eq 'idam-email-service']; then docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}; fi
+        cat Dockerfile | sed 's/^FROM\s.*/FROM '"${image}"':'"${DOCKER_TAG_BEFORE_BUILD}"'\nUSER root/' > "${DOCKERFILE}"
+        docker build --tag ${image}:${DOCKER_TAG_AFTER_BUILD} --file "${DOCKERFILE}" .
+        rm "${DOCKERFILE}"
         docker rmi ${image}:${DOCKER_TAG_BEFORE_BUILD}
     fi
 }
