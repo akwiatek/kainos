@@ -12,6 +12,21 @@ DOCKER_TAG_NOW=$(date +%Y%m%d%H%M%S)
 # .md extension has been added in order to be ignored with .dockerignore
 DOCKERFILE=Dockerfile.tmp.md
 
+ARG_DOCKER_INCREMENTAL='NO'
+
+read_arguments() {
+    while [[ $# -gt 0 ]]
+    do
+        local key="$1"
+        case $key in
+            --incremental)
+            ARG_DOCKER_INCREMENTAL='YES'
+            ;;
+        esac
+        shift
+    done
+}
+
 set_up_status_file() {
     [ -e $STATUS_FILE ] || touch $STATUS_FILE
 }
@@ -107,7 +122,11 @@ build_dev_docker() {
 build_docker() {
     if [ -f Dockerfile ]; then
         local image=$(get_docker_image_name)
-        docker tag ${image}:latest ${image}:${DOCKER_TAG_BEFORE_BUILD} || docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
+        if [ 'YES' = "${ARG_DOCKER_INCREMENTAL}" ]; then
+            docker tag ${image}:latest ${image}:${DOCKER_TAG_BEFORE_BUILD} || docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
+        else
+            docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
+        fi
         cat Dockerfile | sed 's/^FROM\s.*/FROM '"${image}"':'"${DOCKER_TAG_BEFORE_BUILD}"'\nUSER root/' > "${DOCKERFILE}"
         docker build --tag ${image}:${DOCKER_TAG_AFTER_BUILD} --file "${DOCKERFILE}" .
         rm "${DOCKERFILE}"
@@ -141,6 +160,7 @@ clean_up_docker() {
 # go to the script's folder
 pushd $0:h
 
+read_arguments
 set_up_status_file
 for_each_project download_changes
 for_each_project apply_changes
