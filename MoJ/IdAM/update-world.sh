@@ -52,7 +52,7 @@ apply_changes() {
     fi
 }
 
-download_dependencies() {
+download_dev_dependencies() {
     if [ -f pom.xml ]; then
         mvn \
             --define findbugs.skip=true \
@@ -72,6 +72,9 @@ download_dependencies() {
     if [ -f bower.json ]; then
         bower update
     fi
+}
+
+download_ops_dependencies() {
     find . -name 'requirements*.yml' | while read req; do
         pushd "$(dirname $req)"
         local breq="$(basename $req)"
@@ -105,11 +108,6 @@ build_docker() {
     if [ -f Dockerfile ]; then
         local image=$(get_docker_image_name)
         docker tag ${image}:latest ${image}:${DOCKER_TAG_BEFORE_BUILD} || docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
-        if [ "$image" eq 'dmzstub-proxy']; then
-            docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}
-        fi
-        # TODO pending CR
-        if [ "$image" eq 'idam-email-service']; then docker tag idam:2.0 ${image}:${DOCKER_TAG_BEFORE_BUILD}; fi
         cat Dockerfile | sed 's/^FROM\s.*/FROM '"${image}"':'"${DOCKER_TAG_BEFORE_BUILD}"'\nUSER root/' > "${DOCKERFILE}"
         docker build --tag ${image}:${DOCKER_TAG_AFTER_BUILD} --file "${DOCKERFILE}" .
         rm "${DOCKERFILE}"
@@ -146,10 +144,11 @@ pushd $0:h
 set_up_status_file
 for_each_project download_changes
 for_each_project apply_changes
-for_each_project download_dependencies
+for_each_project download_ops_dependencies
 clean_up_docker
 build_dev_docker
 for_each_project build_docker
 for_each_project tag_docker
 tag_demo_data
+for_each_project download_dev_dependencies
 tear_down_status_file
