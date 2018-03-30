@@ -61,14 +61,15 @@ EOF
 }
 
 resolve_period() {
+    local this_month_period=$(date '+%Y%m')
     local period
     if [ -n "$OPTION_THIS_MONTH" ]
     then
-        period=$(date --date 'now' '+%Y%m')
+        period=$this_month_period
     fi
     if [ -n "$OPTION_PREV_MONTH" ]
     then
-        period=$(date --date '1 month ago' '+%Y%m')
+        period=$(date --date "${this_month_period}01 - 1 day" '+%Y%m')
     fi
     if [ -n "$OPTION_MONTH" ]
     then
