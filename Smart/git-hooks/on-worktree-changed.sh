@@ -2,6 +2,9 @@
 
 set -e
 
+echo 'Flush smart-web-2.0'
+[ ! -d smart-web-2.0/ui-tests/reports/ ] || rm --recursive smart-web-2.0/ui-tests/reports/
+
 echo 'Index smart-web-2.0'
 cd smart-web-2.0
 ctags --recurse --exclude={bower_components,node_modules,release,tmp}

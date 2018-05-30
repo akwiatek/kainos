@@ -1,6 +1,7 @@
 #!env zsh
 
 set -e
+set -x
 
 read_options() {
     while [[ $# -gt 0 ]]
