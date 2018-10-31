@@ -1,7 +1,6 @@
 #!env zsh
 
 set -e
-set -x
 
 read_options() {
     while [[ $# -gt 0 ]]
@@ -93,7 +92,7 @@ git_email() {
 }
 
 git_log() {
-    git log --remotes --no-merges --author="$GIT_EMAIL" --since="$GIT_SINCE" --until="$GIT_UNTIL" "$@"
+    git log --remotes --no-merges --author="$GIT_EMAIL" --since="$GIT_SINCE" --until="$GIT_UNTIL" --grep='^KS-' "$@"
 }
 
 process_repositories() {
