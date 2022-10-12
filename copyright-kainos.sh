@@ -88,7 +88,8 @@ git_date() {
 }
 
 git_email() {
-    git config --get user.email
+    #git config --get user.email
+    echo 'adamkw@kainos.com'
 }
 
 git_log() {
@@ -127,7 +128,7 @@ GIT_SINCE=$(git_date 0  0)
 GIT_UNTIL=$(git_date 1 -1)
 GIT_EMAIL="$(git_email)"
 OUTPUT_TMP="$(mktemp)"
-OUTPUT="$HOME/copyright-${GIT_EMAIL}-${YEAR}${MONTH}.txt.xz"
+OUTPUT="$HOME/copyright-${GIT_EMAIL/@/-}-${YEAR}${MONTH}.txt.xz"
 
 process_repositories
 xz "$OUTPUT_TMP"
